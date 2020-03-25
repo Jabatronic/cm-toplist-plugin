@@ -41,27 +41,28 @@ class Cm_Toplist_Activator {
 		/**
 		 * TODO: Add version checking to avoid adding duplicate data to database
 		 */
+		if( $wpdb->get_var( "SHOW TABLES LIKE '$table_name'" ) != $table_name ) {
+			$sql = "CREATE TABLE $table_name (
+				id int(11) NOT NULL AUTO_INCREMENT, 
+				name varchar(255) NOT NULL,
+				PRIMARY KEY  (id)
+			) $charset_collate;";
 
-		$sql = "CREATE TABLE $table_name (
-			id int(11) NOT NULL AUTO_INCREMENT, 
-			name varchar(255) NOT NULL,
-			PRIMARY KEY  (id)
-		) $charset_collate;";
+			$table_2_name = $wpdb->prefix . 'toplist_brand_ratings';
 
-		$table_2_name = $wpdb->prefix . 'toplist_brand_ratings';
+			$sql2 = "CREATE TABLE $table_2_name (
+				id int(11) NOT NULL AUTO_INCREMENT,
+				brand_id int(11) NOT NULL, 
+				rating int(11) NOT NULL,
+				PRIMARY KEY  (id)
+			) $charset_collate;";
 
-		$sql2 = "CREATE TABLE $table_2_name (
-			id int(11) NOT NULL AUTO_INCREMENT,
-			brand_id int(11) NOT NULL, 
-			rating int(11) NOT NULL,
-			PRIMARY KEY  (id)
-		) $charset_collate;";
+			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+			dbDelta( $sql );
+			dbDelta( $sql2 );
 
-		dbDelta( $sql );
-		dbDelta( $sql2 );
-
-		update_site_option( 'toplist_db_version', 1 );
+			update_site_option( 'toplist_db_version', 1 );
+		}
 	}
 }
