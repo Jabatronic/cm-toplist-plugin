@@ -156,6 +156,8 @@ class Cm_Toplist {
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+		// Hook the function that creates the custom tables
+		$this->loader->add_action( 'init', $plugin_admin, 'cm_initialise_custom_tables' );
 
 	}
 
