@@ -171,6 +171,8 @@ class Cm_Toplist {
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		// Hook the shortcode
+		$this->loader->add_shortcode( 'showtoplist', $plugin_public, 'cm_show_toplist' );
 
 	}
 

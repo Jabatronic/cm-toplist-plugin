@@ -55,6 +55,39 @@ class Cm_Toplist_Public {
 	}
 
 	/**
+	 * Show toplist data
+	 *
+	 * @param  Array $atts
+	 * @return void
+	 */
+	public function cm_show_toplist( $atts ) {
+		global $wpdb;
+		$querystr = "
+			SELECT wp_toplist_brands.name,
+			wp_toplist_brand_ratings.rating
+			FROM wp_toplist_brands
+			JOIN wp_toplist_brand_ratings ON wp_toplist_brands.id = wp_toplist_brand_ratings.brand_id
+		";
+
+		$data = $wpdb->get_results($querystr);
+		// var_dump($data);
+		echo '<table id="cm_toplist_table" class="cm_toplist_table">
+				<thead class="cm_toplist_thead">
+					<tr class="cm_toplist_thead__row">
+						<td class="cm_toplist_thead__cell">Casino</td>
+						<td class="cm_toplist_thead__cell">Rating</td>
+					</tr>
+				</thead>
+				<tbody>';
+
+		foreach ( $data as $item ) {
+			echo	esc_html( '<tr><td>' . $item->name . '</td><td>' . $item->rating . '</td></tr>' );
+		}
+		echo '</tbody>';
+		echo '</table>';
+	}
+
+	/**
 	 * Register the stylesheets for the public-facing side of the site.
 	 *
 	 * @since    1.0.0
