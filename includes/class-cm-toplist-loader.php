@@ -40,16 +40,26 @@ class Cm_Toplist_Loader {
 	 * @var      array    $filters    The filters registered with WordPress to fire when the plugin loads.
 	 */
 	protected $filters;
+	/**
+	 * The array of shortcodes registered with WordPress.
+	 *
+	 * @since    1.0.0
+	 * @access   protected
+	 * @var      array    $shortcodes    The shortcodes registered.
+	 */
+	protected $shortcodes;
 
 	/**
 	 * Initialize the collections used to maintain the actions and filters.
 	 *
 	 * @since    1.0.0
 	 */
+
 	public function __construct() {
 
-		$this->actions = array();
-		$this->filters = array();
+		$this->actions    = array();
+		$this->filters    = array();
+		$this->shortcodes = array();
 
 	}
 
@@ -102,7 +112,7 @@ class Cm_Toplist_Loader {
 			'component'     => $component,
 			'callback'      => $callback,
 			'priority'      => $priority,
-			'accepted_args' => $accepted_args
+			'accepted_args' => $accepted_args,
 		);
 
 		return $hooks;
@@ -124,6 +134,23 @@ class Cm_Toplist_Loader {
 			add_action( $hook['hook'], array( $hook['component'], $hook['callback'] ), $hook['priority'], $hook['accepted_args'] );
 		}
 
+		foreach ( $this->shortcodes as $hook ) {
+			add_shortcode( $hook['hook'], array( $hook['component'], $hook['callback'] ) );
+		}
+
+	}
+
+	/**
+	 * Add a new shortcode to the collection to be registered with WordPress
+	 *
+	 * @since     1.0.0
+	 * @param     string        $tag            The name of the new shortcode.
+	 * @param     object        $component      A reference to the instance of the object on which the shortcode is defined.
+	 * @param     string        $callback       The name of the function that defines the shortcode.
+	 * @param     int           $priority       The priority.
+	 */
+	public function add_shortcode( $tag, $component, $callback, $priority = 10, $accepted_args = 2 ) {
+		$this->shortcodes = $this->add( $this->shortcodes, $tag, $component, $callback, $priority, $accepted_args );
 	}
 
 }
