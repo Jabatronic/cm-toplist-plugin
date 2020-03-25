@@ -67,6 +67,7 @@ class Cm_Toplist_Public {
 			wp_toplist_brand_ratings.rating
 			FROM wp_toplist_brands
 			JOIN wp_toplist_brand_ratings ON wp_toplist_brands.id = wp_toplist_brand_ratings.brand_id
+			ORDER BY wp_toplist_brand_ratings.rating DESC
 		";
 
 		$data = $wpdb->get_results($querystr);
@@ -81,7 +82,7 @@ class Cm_Toplist_Public {
 				<tbody>';
 
 		foreach ( $data as $item ) {
-			echo	esc_html( '<tr><td>' . $item->name . '</td><td>' . $item->rating . '</td></tr>' );
+			echo '<tr><td>' . $item->name . '</td><td>' . $item->rating . '</td></tr>';
 		}
 		echo '</tbody>';
 		echo '</table>';
