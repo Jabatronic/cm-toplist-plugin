@@ -30,7 +30,8 @@ class Cm_Toplist_Activator {
 	 * @since    1.0.0
 	 */
 	public static function activate() {
-
+		// Hook the function that creates the custom tables.
+		register_activation_hook( __FILE__, 'create_toplist_tables' );
 	}
 
 }
