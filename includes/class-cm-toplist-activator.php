@@ -30,8 +30,38 @@ class Cm_Toplist_Activator {
 	 * @since    1.0.0
 	 */
 	public static function activate() {
-		// Hook the function that creates the custom tables.
-		register_activation_hook( __FILE__, 'create_toplist_tables' );
-	}
+		global $wpdb;
 
+		$charset_collate = $wpdb->get_charset_collate();
+
+		$table_name = $wpdb->prefix . 'toplist_brands';
+
+		$version = (int) get_site_option( 'toplist_db_version' );
+
+		/**
+		 * TODO: Add version checking to avoid adding duplicate data to database
+		 */
+
+		$sql = "CREATE TABLE $table_name (
+			id int(11) NOT NULL AUTO_INCREMENT, 
+			name varchar(255) NOT NULL,
+			PRIMARY KEY  (id)
+		) $charset_collate;";
+
+		$table_2_name = $wpdb->prefix . 'toplist_brand_ratings';
+
+		$sql2 = "CREATE TABLE $table_2_name (
+			id int(11) NOT NULL AUTO_INCREMENT,
+			brand_id int(11) NOT NULL, 
+			rating int(11) NOT NULL,
+			PRIMARY KEY  (id)
+		) $charset_collate;";
+
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+		dbDelta( $sql );
+		dbDelta( $sql2 );
+
+		update_site_option( 'toplist_db_version', 1 );
+	}
 }

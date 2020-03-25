@@ -55,52 +55,6 @@ class Cm_Toplist_Admin {
 	}
 
 	/**
-	 * Create the tables to hold our data
-	 *
-	 * @return $success
-	 */
-	public function cm_initialise_custom_tables() {
-		global $wpdb;
-
-		$charset_collate = $wpdb->get_charset_collate();
-
-		$table_name = $wpdb->prefix . 'toplist_brands';
-
-		$version = (int) get_site_option( 'toplist_db_version' );
-
-		/**
-		 * TODO: Add version checking to avoid adding duplicate data to database
-		 */
-
-		$sql = "CREATE TABLE $table_name (
-			id int(11) NOT NULL AUTO_INCREMENT, 
-			name varchar(255) NOT NULL,
-			PRIMARY KEY  (id)
-		) $charset_collate;";
-
-		$table_2_name = $wpdb->prefix . 'toplist_brand_ratings';
-
-		$sql2 = "CREATE TABLE $table_2_name (
-			id int(11) NOT NULL AUTO_INCREMENT,
-			brand_id int(11) NOT NULL, 
-			rating int(11) NOT NULL,
-			PRIMARY KEY  (id)
-		) $charset_collate;";
-
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-
-		dbDelta( $sql );
-		dbDelta( $sql2 );
-
-		$success = empty( $wpdb->last_error );
-
-		update_site_option( 'toplist_db_version', 1 );
-
-		return $success;
-	}
-
-
-	/**
 	 * Register the stylesheets for the admin area.
 	 *
 	 * @since    1.0.0
