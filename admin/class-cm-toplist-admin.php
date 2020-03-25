@@ -44,8 +44,8 @@ class Cm_Toplist_Admin {
 	 * Initialize the class and set its properties.
 	 *
 	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
+	 * @param    string    $plugin_name       The name of this plugin.
+	 * @param    string    $version    The version of this plugin.
 	 */
 	public function __construct( $plugin_name, $version ) {
 
@@ -53,6 +53,52 @@ class Cm_Toplist_Admin {
 		$this->version = $version;
 
 	}
+
+	/**
+	 * Create the tables to hold our data
+	 *
+	 * @return $success
+	 */
+	public function cm_initialise_custom_tables() {
+		global $wpdb;
+
+		$charset_collate = $wpdb->get_charset_collate();
+
+		$table_name = $wpdb->prefix . 'toplist_brands';
+
+		$version = (int) get_site_option( 'toplist_db_version' );
+
+		/**
+		 * TODO: Add version checking to avoid adding duplicate data to database
+		 */
+
+		$sql = "CREATE TABLE $table_name (
+			id int(11) NOT NULL AUTO_INCREMENT, 
+			name varchar(255) NOT NULL,
+			PRIMARY KEY  (id)
+		) $charset_collate;";
+
+		$table_2_name = $wpdb->prefix . 'toplist_brand_ratings';
+
+		$sql2 = "CREATE TABLE $table_2_name (
+			id int(11) NOT NULL AUTO_INCREMENT,
+			brand_id int(11) NOT NULL, 
+			rating int(11) NOT NULL,
+			PRIMARY KEY  (id)
+		) $charset_collate;";
+
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+		dbDelta( $sql );
+		dbDelta( $sql2 );
+
+		$success = empty( $wpdb->last_error );
+
+		update_site_option( 'toplist_db_version', 1 );
+
+		return $success;
+	}
+
 
 	/**
 	 * Register the stylesheets for the admin area.
