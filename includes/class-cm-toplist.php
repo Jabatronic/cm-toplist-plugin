@@ -76,6 +76,7 @@ class Cm_Toplist {
 
 		$this->load_dependencies();
 		$this->set_locale();
+		$this->create_endpoint();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
 
@@ -122,6 +123,11 @@ class Cm_Toplist {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-cm-toplist-public.php';
 
+		/**
+		 * The class responsible for creating the custom endpoint for API.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cm-toplist-custom-endpoint.php';
+
 		$this->loader = new Cm_Toplist_Loader();
 
 	}
@@ -142,6 +148,27 @@ class Cm_Toplist {
 		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
 
 	}
+
+	/**
+	 * Define the Custom Endpoint for API.
+	 *
+	 * Create the Route, Custom Endpoint & data for API.
+	 *
+	 * @since    0.1.0
+	 * @access   private
+	 */
+	private function create_endpoint() {
+
+		$plugin_endpoint = new CM_Toplist_API_Custom_Endpoint( $this->get_plugin_name(), $this->get_version() );
+
+		// Add Admin Notice if Below WordPress version 4.7 & WordPress API plugin is not installed.
+		$this->loader->add_action( 'admin_notices', $plugin_endpoint, 'cm_toplist_api_nag_message' );
+
+		// Construct Custom Endpoint.
+		$this->loader->add_action( 'rest_api_init', $plugin_endpoint, 'cm_toplist_api_route_constructor' );
+
+	}
+
 
 	/**
 	 * Register all of the hooks related to the admin area functionality
@@ -216,6 +243,18 @@ class Cm_Toplist {
 	 */
 	public function get_version() {
 		return $this->version;
+	}
+
+	/**
+	 * Retrieve the option prefix for API Boilerplate.
+	 *
+	 * @since     0.1
+	 * @return    string    The option name prefix of the plugin.
+	 */
+	public function get_option_name() {
+
+		return $this->option_name;
+
 	}
 
 }
