@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Provide a admin area view for the plugin
  *
@@ -11,6 +10,8 @@
  * @package    Cm_Toplist
  * @subpackage Cm_Toplist/admin/partials
  */
+
 ?>
 
 <!-- This file should primarily consist of HTML with a little bit of PHP. -->
+<h1>This is my options page...Yayyy!!</h1>

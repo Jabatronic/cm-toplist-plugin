@@ -55,6 +55,31 @@ class Cm_Toplist_Admin {
 	}
 
 	/**
+	 * Define the menu
+	 *
+	 * @return void
+	 */
+	public function cm_display_admin_page() {
+		add_menu_page(
+			'Catena Media Toplist',     // Page Title.
+			'CM Toplist',               // Menu Title.
+			'manage_options',           // Capabilities.
+			'cm-toplist-admin',         // Menu Slug.
+			array( $this, 'cm_display_page' ), // Function.
+			'5',                        // Menu Position.
+		);
+	}
+
+	/**
+	 * Pull in the custom admin page template
+	 *
+	 * @return void
+	 */
+	public function cm_display_page() {
+		include plugin_dir_path( __FILE__ ) . 'partials/cm-toplist-admin-display.php';
+	}
+
+	/**
 	 * Register the stylesheets for the admin area.
 	 *
 	 * @since    1.0.0
