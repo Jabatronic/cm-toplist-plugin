@@ -11,21 +11,10 @@
  *
  * @package    Cm_Toplist
  * @subpackage Cm_Toplist/includes
- */
-
-
-/**
- * Define the custom endpoint content.
  *
- * Add the route for the API Boilerplate Custom Endpoint and generate
- * the necessary data for the frontend.
- *
- * @package    api_boilerplate
- * @subpackage api_boilerplate/includes
- * @since      0.1.0
- * @author     Sean Blakeley <sean@seanblakeley.co.uk>
+ * https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/#examples
  */
-class CM_Toplist_API_Custom_Endpoint {
+class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 
 	/**
 	 * The ID of this plugin.
@@ -104,52 +93,336 @@ class CM_Toplist_API_Custom_Endpoint {
 	}
 
 	/**
-	 * API Route Constructor.
-	 *
-	 * @since    0.1.0
+	 * Register the routes for the objects of the controller.
 	 */
 	public function cm_toplist_api_route_constructor() {
+		$version = '1';
+		$namespace = $this->plugin_name . '/v' . $version;
+		$base = 'route';
+		register_rest_route( $namespace, '/' . $base, array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_items' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'args'                => array(
 
-		register_rest_route( '/cm-toplist/v1', '/first-example', array(
-			'methods' => 'GET',
-			'callback' => array( $this, 'cm_toplist_api_endpoint_first_example' )
+				),
+			),
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'create_item' ),
+				'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( true ),
+			),
 		) );
-
-		register_rest_route( '/cm-toplist/v1', '/second-example', array(
-			'methods' => 'GET',
-			'callback' => array( $this, 'cm_toplist_api_endpoint_second_example' )
+		register_rest_route( $namespace, '/' . $base . '/(?P<id>[\d]+)', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_item' ),
+				'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				'args'                => array(
+					'context' => array(
+						'default' => 'view',
+					),
+				),
+			),
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_item' ),
+				'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( false ),
+			),
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_item' ),
+				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+				'args'                => array(
+					'force' => array(
+						'default' => false,
+					),
+				),
+			),
 		) );
-
+		register_rest_route( $namespace, '/' . $base . '/schema', array(
+			'methods'  => WP_REST_Server::READABLE,
+			'callback' => array( $this, 'get_public_item_schema' ),
+		) );
 	}
 
 	/**
-	 * API Endpoint first example.
+	 * Get a collection of items
 	 *
-	 * @since    0.1.0
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|WP_REST_Response
 	 */
-	public function cm_toplist_api_endpoint_first_example( WP_REST_Request $params ) {
+	public function get_items( $request ) {
+		global $wpdb;
 
-		$api = array();
+		$sql = "
+		SELECT wp_toplist_brands.name,
+		wp_toplist_brand_ratings.rating
+		FROM wp_toplist_brands
+		JOIN wp_toplist_brand_ratings ON wp_toplist_brands.id = wp_toplist_brand_ratings.brand_id
+		ORDER BY wp_toplist_brand_ratings.rating DESC
+	";
 
-		$api['first-example'] = "this is the first example endpoint data";
+		$items = array(
+			$wpdb->get_results( $sql, ARRAY_A )
+		);
 
-		return $api;
+		$data = array();
+		foreach( $items as $item ) {
+			$itemdata = $this->prepare_item_for_response( $item, $request );
+			$data[] = $this->prepare_response_for_collection( $itemdata );
+		}
 
+		return new WP_REST_Response( $data, 200 );
 	}
 
 	/**
-	 * API Endpoint second example.
+	 * Get one item from the collection
 	 *
-	 * @since    0.1.0
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|WP_REST_Response
 	 */
-	public function cm_toplist_api_endpoint_second_example( WP_REST_Request $params ) {
+	public function get_item( $request ) {
+		//get parameters from request
+		$params = $request->get_params();
+		$item = array();//do a query, call another class, etc
+		$data = $this->prepare_item_for_response( $item, $request );
 
-		$api = array();
-
-		$api['second-example'] = "this is the second example endpoint data";
-
-		return $api;
-
+		//return a response or error based on some conditional
+		if ( 1 == 1 ) {
+			return new WP_REST_Response( $data, 200 );
+		} else {
+			return new WP_Error( 'code', __( 'messagellll', 'text-domain' ) );
+		}
 	}
 
+	/**
+	 * Create one item from the collection
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function create_item( $request ) {
+		$item = $this->prepare_item_for_database( $request );
+		var_dump($item['brand_name']);
+		// var_dump($request);
+		if ( method_exists( $this, 'cm_toplist_add_rating' ) ) {
+			$data = $this->cm_toplist_add_rating( $item );
+			// var_dump($data);
+			if ( is_array( $data ) ) {
+				return new WP_REST_Response( $data, 200 );
+			} else {
+				echo 'not created';
+				return $data;
+			}
+		}
+
+		return new WP_Error( 'cant-create', __( 'messagxxxe' . $msg, 'text-domain' ), array( 'status' => 500 ) );
+		// return $data;
+	}
+
+	/**
+	 * Update one item from the collection
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function update_item( $request ) {
+		$item = $this->prepare_item_for_database( $request );
+
+		if ( function_exists( 'slug_some_function_to_update_item' ) ) {
+			$data = slug_some_function_to_update_item( $item );
+			if ( is_array( $data ) ) {
+				return new WP_REST_Response( $data, 200 );
+			}
+		}
+
+		return new WP_Error( 'cant-update', __( 'messagezzzz', 'text-domain' ), array( 'status' => 500 ) );
+	}
+
+	/**
+	 * Delete one item from the collection
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function delete_item( $request ) {
+		$item = $this->prepare_item_for_database( $request );
+
+		if ( function_exists( 'slug_some_function_to_delete_item' ) ) {
+			$deleted = slug_some_function_to_delete_item( $item );
+			if ( $deleted ) {
+				return new WP_REST_Response( true, 200 );
+			}
+		}
+
+		return new WP_Error( 'cant-delete', __( 'messageyyy', 'text-domain' ), array( 'status' => 500 ) );
+	}
+
+	/**
+	 * Check if a given request has access to get items
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function get_items_permissions_check( $request ) {
+		return true; // <--use to make readable by all.
+		// return current_user_can( 'edit_something' );
+	}
+
+	/**
+	 * Check if a given request has access to get a specific item
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function get_item_permissions_check( $request ) {
+		return $this->get_items_permissions_check( $request );
+	}
+
+	/**
+	 * Check if a given request has access to create items
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function create_item_permissions_check( $request ) {
+		// return current_user_can( 'edit_something' );
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access to update a specific item
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function update_item_permissions_check( $request ) {
+		return $this->create_item_permissions_check( $request );
+	}
+
+	/**
+	 * Check if a given request has access to delete a specific item
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function delete_item_permissions_check( $request ) {
+		return $this->create_item_permissions_check( $request );
+	}
+
+	/**
+	 * Prepare the item for create or update operation
+	 *
+	 * @param WP_REST_Request $request Request object
+	 * @return WP_Error|object $prepared_item
+	 */
+	protected function prepare_item_for_database( $request ) {
+		$request_brandname    = $request->get_param( 'brand_name' );
+		$request_brand_rating = $request->get_param( 'brand_rating' );
+
+		// var_dump( $request_brandname );
+		// var_dump( $request_brand_rating );
+
+		if ( isset( $request_brandname ) ) {
+			$brand_name = wp_filter_nohtml_kses( sanitize_text_field( $request_brandname ) );
+		} else {
+			$brand_name = '';
+		}
+
+		if ( isset( $request_brand_rating ) ) {
+			$brand_rating = wp_filter_nohtml_kses( sanitize_text_field( $request_brand_rating ) );
+		} else {
+			$brand_rating = '';
+		}
+
+		$item = array(
+			'brand_name'   => $brand_name,
+			'brand_rating' => $brand_rating,
+		);
+
+		// var_dump($item);
+		return $item;
+	}
+
+	/**
+	 * Prepare the item for the REST response
+	 *
+	 * @param mixed $item WordPress representation of the item.
+	 * @param WP_REST_Request $request Request object.
+	 * @return mixed
+	 */
+	public function prepare_item_for_response( $item, $request ) {
+		return array();
+	}
+
+	/**
+	 * Get the query params for collections
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		return array(
+			'brand_name' => array(
+				'description'       => 'The name of the brand to be rated.',
+				'type'              => 'string',
+				'sanitize_callback' => 'string',
+			),
+			'brand_rating'     => array(
+				'description'       => 'The rating for the brand.',
+				'type'              => 'integer',
+				'default'           => 1,
+				'sanitize_callback' => 'absint',
+			),
+		);
+	}
+
+	/**
+	 * create a new record and return id 
+	 *
+	 * @return void
+	 */
+	public function cm_toplist_add_rating( $item ) {
+		global $wpdb;
+		$brands_table_name   = $wpdb->prefix . 'toplist_brands';
+		$brand_ratings_table = $wpdb->prefix . 'toplist_brand_ratings';
+		$brand_name          = $item['brand_name'];
+		$brand_rating        = $item['brand_rating'];
+
+		var_dump($brand_name);
+
+		$brand_name_test = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM wp_toplist_brands WHERE name LIKE %s",
+				$brand_name
+			)
+		);
+
+		// $brand_name_test = $wpdb->get_results(
+		// 	"SELECT * FROM wp_toplist_brands WHERE name LIKE 'tittybar'",
+		// );
+
+		if ( $brand_name_test == [] ) {
+			$result = $wpdb->insert( $brands_table_name, $brand_name );
+			$brand_id = $wpdb->insert_id;
+			$result2  = $wpdb->query(
+				$wpdb->prepare(
+					"INSERT INTO `$brand_ratings_table` (brand_id, rating) VALUES (%d, %d);",
+					$brand_id,
+					$brand_rating
+				)
+			);
+			echo $wpdb->last_error;
+			if ( $result ) {
+				return $item;
+			} else {
+				return new WP_Error( 'error_team_insert', __( 'There was an error creating the team. Please check your data and try again.', 'sports-bench' ), array( 'status' => 500 ) );
+			}
+		} else {
+			return new WP_Error( 'error_team_insert', __( 'This team has already been created in the database. Maybe try updating the team.', 'sports-bench' ), array( 'status' => 500 ) );
+		}
+	}
 }
