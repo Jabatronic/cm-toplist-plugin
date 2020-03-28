@@ -115,7 +115,8 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 				'args'                => $this->get_endpoint_args_for_item_schema( true ),
 			),
 		) );
-		register_rest_route( $namespace, '/' . $base . '/(?P<id>[\d]+)', array(
+		// register_rest_route( $namespace, '/' . $base . '/(?P<id>[\d]+)', array(
+		register_rest_route( $namespace, '/' . $base, array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -159,7 +160,9 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 		global $wpdb;
 
 		$sql = "
-		SELECT wp_toplist_brands.name,
+		SELECT 
+		wp_toplist_brands.id,
+		wp_toplist_brands.name,
 		wp_toplist_brand_ratings.rating
 		FROM wp_toplist_brands
 		JOIN wp_toplist_brand_ratings ON wp_toplist_brands.id = wp_toplist_brand_ratings.brand_id
@@ -265,7 +268,7 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 			)
 		);
 
-		if ( $brand_name_test == [] ) {
+		if ( $brand_name_test === [] AND !empty( $brand_rating ) ) {
 			$result = $wpdb->insert( $brands_table_name, array(
 				'name' => $brand_name,
 				)
@@ -279,6 +282,7 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 				) 
 			);
 
+			$item['brand_id'] = $brand_id;
 			// echo $wpdb->last_error;
 
 			if ( $result ) {
@@ -300,6 +304,7 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 	protected function prepare_item_for_database( $request ) {
 		$request_brandname    = $request->get_param( 'brand_name' );
 		$request_brand_rating = $request->get_param( 'brand_rating' );
+		$request_brand_id     = $request->get_param( 'brand_id' );
 
 		if ( isset( $request_brandname ) ) {
 			$brand_name = wp_filter_nohtml_kses( sanitize_text_field( $request_brandname ) );
@@ -313,9 +318,16 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 			$brand_rating = '';
 		}
 
+		if ( isset( $request_brand_id ) ) {
+			$brand_id = wp_filter_nohtml_kses( sanitize_text_field( $request_brand_id ) );
+		} else {
+			$brand_id = '';
+		}
+
 		$item = array(
 			'brand_name'   => $brand_name,
 			'brand_rating' => $brand_rating,
+			'brand_id'     => $brand_id,
 		);
 
 		return $item;
@@ -350,14 +362,78 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 	public function delete_item( $request ) {
 		$item = $this->prepare_item_for_database( $request );
 
-		if ( function_exists( 'slug_some_function_to_delete_item' ) ) {
-			$deleted = slug_some_function_to_delete_item( $item );
-			if ( $deleted ) {
-				return new WP_REST_Response( true, 200 );
+		if ( method_exists( $this, 'cm_toplist_remove_rating' ) ) {
+			$deleted = $this->cm_toplist_remove_rating( $item );
+			if ( is_array( $deleted ) ) {
+				return new WP_REST_Response( 'Item successfully deleted', 200 );
 			}
 		}
 
-		return new WP_Error( 'cant-delete', __( 'messageyyy', 'text-domain' ), array( 'status' => 500 ) );
+		return new WP_Error( 'cant-delete', __( 'message', 'text-domain' ), array( 'status' => 500 ) );
+	}
+
+	/**
+	 * Remove a new record and return id
+	 *
+	 * @param  Array $item
+	 * @return mixed
+	 */
+	public function cm_toplist_remove_rating( $item ) {
+		global $wpdb;
+		$brands_table_name   = $wpdb->prefix . 'toplist_brands';
+		$brand_ratings_table = $wpdb->prefix . 'toplist_brand_ratings';
+		$brand_id            = $item['brand_id'];
+
+		$brand_id_test = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT * FROM wp_toplist_brands WHERE id = %s',
+				$brand_id
+			)
+		);
+
+		if ( ! is_array( $brand_id_test ) ) {
+			return new WP_Error(
+				'error_toplist_remove_rating',
+				__(
+					'There was an error removing this rating. Please check your data and try again.',
+					'cm-toplist'
+				),
+				array( 'status' => 500 )
+			);
+		}
+
+		if ( is_array( $brand_id_test ) ) {
+			$result = $wpdb->delete( $brands_table_name, 
+				array(
+					'id' => $brand_id,
+				),
+				array( '%d' )
+			);
+
+			$result2 = $wpdb->delete( $brand_ratings_table,
+				array(
+					'brand_id' => $brand_id,
+				),
+				array( '%d' )
+			);
+
+			// echo $wpdb->last_error;
+
+			if ( $result ) {
+				return $item;
+			} else {
+				return new WP_Error(
+					'error_toplist_remove_rating',
+					__(
+						'There was an error removing this rating. Please check your data and try again.',
+						'cm-toplist'
+					),
+					array( 'status' => 500 )
+				);
+			}
+		} else {
+			return new WP_Error( 'error_toplist_remove_rating', __( 'There were problems adding your rating to thw data. Maybe try updating the rating instead?.', 'cm-toplist' ), array( 'status' => 500 ) );
+		}
 	}
 
 	/**
@@ -428,6 +504,11 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 				'description'       => 'The rating for the brand.',
 				'type'              => 'integer',
 				'default'           => 1,
+				'sanitize_callback' => 'absint',
+			),
+			'brand_id'     => array(
+				'description'       => 'The id of the brand.',
+				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 			),
 		);
