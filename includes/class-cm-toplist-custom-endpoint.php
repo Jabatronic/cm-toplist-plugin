@@ -464,7 +464,7 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 	 * @return WP_Error|bool
 	 */
 	public function create_item_permissions_check( $request ) {
-		// return current_user_can( 'edit_something' );
+		// return current_user_can( 'administrator' );
 		return true;
 	}
 

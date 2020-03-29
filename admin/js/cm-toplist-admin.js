@@ -35,11 +35,11 @@
         <td><button class="button-primary" @click="add_new">Add new</button></td>
       </tr>    
 		</table>
-		<h3>Debugging</h3>
+		<h3>Debugging API requests/responses</h3>
 		<ul class="form-table" v-if="errors && errors.length">
 
 			<li v-for="(error, index) in errors" :key="index">
-				{{ error.code }}
+				{{ error }}
 			</li>
 		</ul>
 		</div>
@@ -68,6 +68,8 @@
 			add_new: function() {
 				axios
 				.post(`http://localhost/jtron-plugin-dev/wp-json/cm-toplist/v1/route`, {
+					headers: { 'X-WP-Nonce': wpApiSettings.nonce },
+					withCredentials: true,
 					brand_name: this.casino_name,
 					brand_rating: this.casino_rating,
 				})
