@@ -4,6 +4,19 @@
  */
 
  /* Table Mods */
- .form-table td {
-   padding-left: 0;
+ .form-table td,
+ .form-table th {
+   padding-left: 10px;
  }
+
+ .form-table th {
+  font-size: 1rem;
+}
+
+ .form-table td {
+  font-weight: 500;
+ }
+
+.form-table tr:nth-child(even) {
+  background-color: #dfdede;
+}
