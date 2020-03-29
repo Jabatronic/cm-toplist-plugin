@@ -2,3 +2,8 @@
  * All of the CSS for your admin-specific functionality should be
  * included in this file.
  */
+
+ /* Table Mods */
+ .form-table td {
+   padding-left: 0;
+ }

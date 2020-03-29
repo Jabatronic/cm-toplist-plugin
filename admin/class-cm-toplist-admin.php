@@ -121,8 +121,19 @@ class Cm_Toplist_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/cm-toplist-admin.js', array( 'jquery' ), $this->version, false );
+			$wp_api_settings = json_encode(
+				array( 
+					'nonce' => wp_create_nonce( 'wp_rest' ),
+					'root'  => esc_url_raw( rest_url() . 'cm-toplist/v1/route/' ),
+				)
+			);
+			$wp_api_settings = "var wp_api_settings = ${wp_api_settings};";
 
+		// wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/cm-toplist-admin.js', array( 'VueJS', 'Axios' ), $this->version, false );
+		wp_enqueue_script( 'VueJS', 'https://cdn.jsdelivr.net/npm/vue/dist/vue.js', array(), '2.6.11' );
+		wp_enqueue_script( 'Axios', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js', array( 'VueJS' ), '');
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/cm-toplist-admin.js', array( 'VueJS', 'Axios' ), $this->version, true );
+		wp_add_inline_script( $this->plugin_name, $wp_api_settings );
 	}
 
 
