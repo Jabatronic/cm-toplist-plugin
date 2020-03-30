@@ -11,9 +11,9 @@ It must not be used in a production environment!! I recommend testing in a VM or
 Shortcode: \[cm-toplist]
 
 Endpoints:
-- GET all records: http://localhost/jtron-plugin-dev/wp-json/cm-toplist/v1/route
-- POST to add record: http://localhost/jtron-plugin-dev/wp-json/cm-toplist/v1/route/?brand_name=<your-brand-name-here>&brand_rating=<your-rating-here>
-- DELETE a record: http://localhost/jtron-plugin-dev/wp-json/cm-toplist/v1/route/?brand_id=<brand-id-here>
+- GET all records: <wordpress-url>/wp-json/cm-toplist/v1/route
+- POST to add record: <wordpress-url>/wp-json/cm-toplist/v1/route/?brand_name=<your-brand-name-here>&brand_rating=<your-rating-here>
+- DELETE a record: <wordpress-url>/wp-json/cm-toplist/v1/route/?brand_id=<brand-id-here>
 
 ***
 
