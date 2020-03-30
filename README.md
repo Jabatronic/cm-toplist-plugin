@@ -12,8 +12,8 @@ Shortcode: \[cm-toplist]
 
 Endpoints:
 - GET all records: \<wordpress-url\>/wp-json/cm-toplist/v1/route
-- POST to add record: \<wordpress-url\>/wp-json/cm-toplist/v1/route/?brand_name=<your-brand-name-here>&brand_rating=<your-rating-here>
-- DELETE a record: \<wordpress-url\>/wp-json/cm-toplist/v1/route/?brand_id=<brand-id-here>
+- POST to add record: \<wordpress-url\>/wp-json/cm-toplist/v1/route/?brand_name=\<your-brand-name-here\>&brand_rating=\<your-rating-here\>
+- DELETE a record: \<wordpress-url\>/wp-json/cm-toplist/v1/route/?brand_id=\<brand-id-here\>
 
 ***
 
