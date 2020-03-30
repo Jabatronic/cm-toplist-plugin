@@ -62,6 +62,7 @@ Styling
 - Improved responsivity
 - Option to 'update' records in the settings page
 - Better UX for the shortcode output (sorting by rating, brand, links to brand website, etc)
+- Remove redundant code and unused boilerplate
 
 
 Looking forward to your feedback.
