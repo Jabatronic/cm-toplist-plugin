@@ -14,6 +14,16 @@
 ?>
 
 <h1>Catena Media Toplist Plugin</h1>
+<p>Use shortcode to display on pages or posts
+<br> 
+<input 
+	type="text"
+	value="[cm-toplist]"
+	class="regular-text code"
+	readonly 
+/> 
+
+</p>
 <hr>
 <div id="app"></div>
 

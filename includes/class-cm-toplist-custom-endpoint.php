@@ -115,7 +115,7 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 				'args'                => $this->get_endpoint_args_for_item_schema( true ),
 			),
 		) );
-		// register_rest_route( $namespace, '/' . $base . '/(?P<id>[\d]+)', array(
+
 		register_rest_route( $namespace, '/' . $base, array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,

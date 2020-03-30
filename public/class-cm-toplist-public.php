@@ -1,5 +1,4 @@
 <?php
-
 /**
  * The public-facing functionality of the plugin.
  *
@@ -50,12 +49,14 @@ class Cm_Toplist_Public {
 	public function __construct( $plugin_name, $version ) {
 
 		$this->plugin_name = $plugin_name;
-		$this->version = $version;
+		$this->version     = $version;
 
 	}
 
 	/**
 	 * Show toplist data
+	 *
+	 * Used by Shortcode [cm-toplist]
 	 *
 	 * @param  Array $atts
 	 * @return void
@@ -70,9 +71,18 @@ class Cm_Toplist_Public {
 			ORDER BY wp_toplist_brand_ratings.rating DESC
 		";
 
-		$data = $wpdb->get_results($querystr);
+		$data = $wpdb->get_results( $querystr );
 		// var_dump($data);
-		echo '<table id="cm_toplist_table" class="cm_toplist_table">
+
+		/**
+		 * Only show data on specific pages
+		 * (</freespins>, </casinobonuses>)
+		 */
+		$allowed_pages = array( 'freespins', 'casinobonuses' );
+
+		if ( is_page( $allowed_pages ) ) {
+			if ( $data != [] ) {
+				echo '<table id="cm_toplist_table" class="cm_toplist_table">
 				<thead class="cm_toplist_thead">
 					<tr class="cm_toplist_thead__row">
 						<td class="cm_toplist_thead__cell">Casino</td>
@@ -81,11 +91,19 @@ class Cm_Toplist_Public {
 				</thead>
 				<tbody>';
 
-		foreach ( $data as $item ) {
-			echo '<tr><td>' . $item->name . '</td><td>' . $item->rating . '</td></tr>';
+				foreach ( $data as $item ) {
+					echo '<tr><td>' . esc_html( $item->name ) . '</td><td>' . esc_html( $item->rating ) . '</td></tr>';
+				}
+				echo '</tbody>';
+				echo '</table>';
+			} else {
+				echo "<p>There isn't any data to display yet!</p>
+				<p>If you're a site administrator you can add some in the CM Toplist plugin settings page.";
+			}
+		} else {
+			echo 'This shortcode can only display data on the following pages: <pre>' . site_url( $allowed_pages[0]) . '</pre> or <pre>' . site_url( $allowed_pages[1]) . '</pre>';
 		}
-		echo '</tbody>';
-		echo '</table>';
+
 	}
 
 	/**

@@ -3,13 +3,16 @@
 		el: '#app',
 		template: `
 		<div>
-		<table class="form-table" v-if="cm_toplist_data && cm_toplist_data.length">
+		<table class="form-table">
+		<thead>
 		<tr>
 			<th>ID</th>
 			<th>Casino</th>
 			<th>Rating</th>
 			<th>Add / Delete</th>
 		</tr>
+		</thead>
+		<tbody v-if="cm_toplist_data && cm_toplist_data.length">
       <tr v-for="(cm_toplist, index) in cm_toplist_data" :key="index">
         <td>
           {{ cm_toplist.id }}
@@ -19,7 +22,9 @@
         </td>
         <td>Rating: {{ cm_toplist.rating }}</td>
         <td><button class="button-primary" @click="delete_item(index, cm_toplist.id )">Delete</button></td>
-      </tr>
+			</tr>
+			</tbody>
+			<tfoot>
       <tr>
         <td>
           <!-- ID: disabled -->
@@ -33,7 +38,8 @@
           <input type="text" v-model="casino_rating">
         </td>
         <td><button class="button-primary" @click="add_new">Add new</button></td>
-      </tr>    
+			</tr>  
+			</tfoot>  
 		</table>
 		<h3>Debugging API requests/responses</h3>
 		<ul class="form-table" v-if="errors && errors.length">
@@ -55,10 +61,10 @@
 		methods: {
 			delete_item: function(index, delete_id) {
 				axios
-				.delete(`http://localhost/jtron-plugin-dev/wp-json/cm-toplist/v1/route/?brand_id=${delete_id}`)
+				.delete(`${wpApiSettings.url}?brand_id=${delete_id}`)
 				.then(response => {
 					console.log(response);
-					this.cm_toplist_data.splice(index, index);
+					this.cm_toplist_data.splice(index, index + 1);
 				})
 				.catch(e => {
 					console.log(e);
@@ -67,7 +73,7 @@
 			},
 			add_new: function() {
 				axios
-				.post(`http://localhost/jtron-plugin-dev/wp-json/cm-toplist/v1/route`, {
+				.post( wpApiSettings.url, {
 					headers: { 'X-WP-Nonce': wpApiSettings.nonce },
 					withCredentials: true,
 					brand_name: this.casino_name,
@@ -81,6 +87,9 @@
 						name: response.data.brand_name,
 						rating: response.data.brand_rating
 					});
+					
+					this.casino_name = '';
+					this.casino_rating = '';
 				})
 				.catch(e => {
 					console.log(e);

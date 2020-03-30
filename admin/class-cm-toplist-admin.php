@@ -129,7 +129,13 @@ class Cm_Toplist_Admin {
 			wp_enqueue_script( 'Axios', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js', array( 'VueJS' ), null, false );
 			wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/cm-toplist-admin.js', array( 'VueJS', 'Axios' ), $this->version, true );	
 
+			/**
+			 *  Pass the nonce value and rest url
+			 *  for js/cm-toplist-admin.js to use
+			 *  in api requests
+			 */
 			wp_localize_script(  $this->plugin_name, 'wpApiSettings', array(
+				'url' => esc_url_raw( rest_url() . 'cm-toplist/v1/route/' ),
 				'root' => esc_url_raw( rest_url() . 'cm-toplist/v1/route/' ),
 				'nonce' => wp_create_nonce( 'wp_rest' ),
 				)
