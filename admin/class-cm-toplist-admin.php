@@ -66,7 +66,7 @@ class Cm_Toplist_Admin {
 			'manage_options',           // Capabilities.
 			'cm-toplist-admin',         // Menu Slug.
 			array( $this, 'cm_display_page' ), // Function.
-			'5',                        // Menu Position.
+			'5'                         // Menu Position.
 		);
 	}
 
