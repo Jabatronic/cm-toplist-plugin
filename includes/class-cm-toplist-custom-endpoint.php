@@ -313,7 +313,7 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 		}
 
 		if ( isset( $request_brand_rating ) ) {
-			$brand_rating = wp_filter_nohtml_kses( sanitize_text_field( $request_brand_rating ) );
+			$brand_rating = intval( absint( $request_brand_rating ) );
 		} else {
 			$brand_rating = '';
 		}
