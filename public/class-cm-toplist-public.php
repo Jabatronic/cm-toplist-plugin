@@ -98,7 +98,7 @@ class Cm_Toplist_Public {
 				echo '</table>';
 			} else {
 				echo "<p>There isn't any data to display yet!</p>
-				<p>If you're a site administrator you can add some in the CM Toplist plugin settings page.";
+				<p>If you're a site administrator you can add some data in the CM Toplist plugin settings page.";
 			}
 		} else {
 			echo 'This shortcode can only display data on the following pages: <pre>' . site_url( $allowed_pages[0]) . '</pre> or <pre>' . site_url( $allowed_pages[1]) . '</pre>';
