@@ -6,14 +6,23 @@ I have NOT YET solved some rest API authentication issues with this plugin. As s
 
 It must not be used in a production environment!! I recommend testing in a VM or Container.
 
-This was a deep dive for me. My experience with Wordpress has mostly been in customising themes, working on performance. The bulk of my work is in the frontend so I thoroughly enjoyed the challenge of getting deeper into the "guts" of Wordpress and doing some back-end work.
+# Use
+Shortcode: \[cm-toplist]
+Endpoints:
+- GET all records: http://localhost/jtron-plugin-dev/wp-json/cm-toplist/v1/route
+- POST to add record: http://localhost/jtron-plugin-dev/wp-json/cm-toplist/v1/route/?brand_name=<your-brand-name-here>&brand_rating=<your-rating-here>
+- DELETE a record: http://localhost/jtron-plugin-dev/wp-json/cm-toplist/v1/route/?brand_id=<brand-id-here>
+
+***
+
+This was a deep dive for me. My experience with Wordpress has mostly been in customising themes, working on performance. The bulk of my work is in the frontend so I thoroughly enjoyed the challenge of getting deeper into the "guts" of Wordpress and developing my back-end skills which I would like to contine further.
 
 ## Process
 
 
 I began by creating a small "use case" test for each element of functionality that I was unfamiliar with. I did this by constructing very basic, single file plugins using mostly procedural code. It quickly became clear that managing more than a small amount of functionality in this way would become hard to manage and debug.
 
-In researching for a more robust way to put the plugin together I found the Wordpress Plugin Boilerplate which provided me with an opinionated structure to scaffold my project whilst also learning about object oriented approaches to Wordpress development which I would like to develop further.
+In researching for a more robust way to put the plugin together I found the Wordpress Plugin Boilerplate which provided me with an opinionated structure to scaffold my project whilst also learning about object oriented approaches to Wordpress development.
 
 I intend to continue refining this for my own learning and especially to nail down the rest authentication issues!
 
