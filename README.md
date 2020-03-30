@@ -1,13 +1,15 @@
-# Catena Media Technical Challenge #
+# Catena Media Technical Challenge
 
-# IMPORTANT!
+## IMPORTANT!
 
 I have NOT YET solved some rest API authentication issues with this plugin. As such this plugin is vulnerable to security threats!
 
 It must not be used in a production environment!! I recommend testing in a VM or Container.
 
-# Use
+### Use
+
 Shortcode: \[cm-toplist]
+
 Endpoints:
 - GET all records: http://localhost/jtron-plugin-dev/wp-json/cm-toplist/v1/route
 - POST to add record: http://localhost/jtron-plugin-dev/wp-json/cm-toplist/v1/route/?brand_name=<your-brand-name-here>&brand_rating=<your-rating-here>
