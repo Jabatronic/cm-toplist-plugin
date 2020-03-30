@@ -44,7 +44,7 @@ Creating Custom Database Tables
 
 ## Decisions Made
 Plugin Settings Menu/Page
-- I decided to use a top-level menu to be easy to find for those asessing this task
+- I decided to use a top-level menu to be easy to find for those asessing this task. In production I woyldn't do this for a plugin with just a single admin page
 - I chose to use VueJs to create the add/delete page in the admin section. I wanted to demonstrate that I have working knowledge of modern javascript frameworks and also wanted to learn how to integrate Vue with Wordpress. This was a limited approach which could be expanded upon by creating good workflow and implementing tooling and build processes
 Rest API
 - I chose to leave requests to the API as unauthenticated for all users as I could not get wp_nonce header authentication to work yet. This made me sad and I will continue to seek a solution (any tips gratefully received!). 
