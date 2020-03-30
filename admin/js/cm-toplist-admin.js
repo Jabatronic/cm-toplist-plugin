@@ -21,7 +21,7 @@
           {{ cm_toplist.name }}
         </td>
         <td>Rating: {{ cm_toplist.rating }}</td>
-        <td><button class="button-primary" @click="delete_item(index, cm_toplist.id )">Delete</button></td>
+        <td><button class="button-primary" @click="delete_item(index, cm_toplist.id, cm_toplist.name )">Delete</button></td>
 			</tr>
 			</tbody>
 			<tfoot>
@@ -59,17 +59,19 @@
 			};
 		},
 		methods: {
-			delete_item: function(index, delete_id) {
-				axios
-				.delete(`${wpApiSettings.url}?brand_id=${delete_id}`)
-				.then(response => {
-					console.log(response);
-					this.cm_toplist_data.splice(index, index + 1);
-				})
-				.catch(e => {
-					console.log(e);
-					this.errors.push(e);
-				});
+			delete_item: function(index, delete_id, delete_name) {
+				if ( confirm(`Are you sure you wish to remove ${delete_name} from the database? `) ) {
+					axios
+					.delete(`${wpApiSettings.url}?brand_id=${delete_id}`)
+					.then(response => {
+						console.log(response);
+						this.cm_toplist_data.splice(index, index + 1);
+					})
+					.catch(e => {
+						console.log(e);
+						this.errors.push(e);
+					});
+				}
 			},
 			add_new: function() {
 				axios
