@@ -80,19 +80,20 @@ class Cm_Toplist_Public {
 		 */
 		$allowed_pages = array( 'freespins', 'casinobonuses' );
 
+		echo '<div class="shortcode-wrap">';
 		if ( is_page( $allowed_pages ) ) {
-			if ( $data != [] ) {
+			if ( $data !== [] ) {
 				echo '<table id="cm_toplist_table" class="cm_toplist_table">
-				<thead class="cm_toplist_thead">
+				<thead class="cm_toplist_thead has-yellow-bg">
 					<tr class="cm_toplist_thead__row">
-						<td class="cm_toplist_thead__cell">Casino</td>
-						<td class="cm_toplist_thead__cell">Rating</td>
+						<th class="cm_toplist_thead__cell">Casino</th>
+						<th class="cm_toplist_thead__cell">Rating</th>
 					</tr>
 				</thead>
 				<tbody>';
 
 				foreach ( $data as $item ) {
-					echo '<tr><td>' . esc_html( $item->name ) . '</td><td>' . esc_html( $item->rating ) . '</td></tr>';
+					echo '<tr class="cm_toplist_tbody__row"><td class="cm_toplist_tbody__cell">' . esc_html( $item->name ) . '</td><td>' . esc_html( $item->rating ) . '</td></tr>';
 				}
 				echo '</tbody>';
 				echo '</table>';
@@ -103,6 +104,7 @@ class Cm_Toplist_Public {
 		} else {
 			echo 'This shortcode can only display data on the following pages: <pre>' . site_url( $allowed_pages[0]) . '</pre> or <pre>' . site_url( $allowed_pages[1]) . '</pre>';
 		}
+		echo '</div>';
 
 	}
 
