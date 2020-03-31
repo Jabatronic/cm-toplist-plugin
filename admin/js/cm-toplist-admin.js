@@ -65,7 +65,7 @@
 					.delete(`${wpApiSettings.url}?brand_id=${delete_id}`)
 					.then(response => {
 						console.log(response);
-						this.cm_toplist_data.splice(index, index + 1);
+						this.cm_toplist_data.splice(index, 1);
 					})
 					.catch(e => {
 						console.log(e);
