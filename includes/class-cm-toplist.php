@@ -125,7 +125,8 @@ class Cm_Toplist {
 		/**
 		 * The class responsible for creating the custom endpoint for API.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cm-toplist-custom-endpoint.php';
+		// require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cm-toplist-custom-endpoint.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-cm-toplist-admin-custom-endpoint.php';
 
 		$this->loader = new Cm_Toplist_Loader();
 
