@@ -42,10 +42,10 @@
 			</tfoot>  
 		</table>
 		<h3>Debugging API requests/responses</h3>
-		<ul class="form-table" v-if="errors && errors.length">
+		<ul class="form-table" v-if="msg && msg.length">
 
-			<li v-for="(error, index) in errors" :key="index">
-				{{ error }}
+			<li v-for="(m, index) in msg" :key="index">
+				{{ m }}
 			</li>
 		</ul>
 		</div>
@@ -53,27 +53,36 @@
 		data() {
 			return {
 				cm_toplist_data: [],
-				errors: [],
+				msg: [],
 				casino_name: '',
 				casino_rating: '',
 			};
 		},
 		methods: {
 			delete_item: function(index, delete_id, delete_name) {
+				// empty previous errors
+				this.msg = [];
 				if ( confirm(`Are you sure you wish to remove ${delete_name} from the database? `) ) {
 					axios
 					.delete(`${wpApiSettings.url}?brand_id=${delete_id}`)
 					.then(response => {
 						console.log(response);
 						this.cm_toplist_data.splice(index, 1);
+
+						// Output response msg
+						this.msg.push(response.data)
 					})
-					.catch(e => {
-						console.log(e);
-						this.errors.push(e);
+					.catch(e => {	
+					console.log(e);
+					// add the new errors
+					this.msg.push(e);
 					});
 				}
 			},
 			add_new: function() {
+				// empty previous errors
+				this.msg = [];
+
 				axios
 				.post( wpApiSettings.url, {
 					headers: { 'X-WP-Nonce': wpApiSettings.nonce },
@@ -89,14 +98,18 @@
 						name: response.data.brand_name,
 						rating: response.data.brand_rating
 					});
+
+					// Output response msg
+					this.msg.push(response.data)
 					
+					// empty the input data
 					this.casino_name = '';
 					this.casino_rating = '';
 				})
-				.catch(e => {
+				.catch(e => {			
 					console.log(e);
-
-					this.errors.push(e);
+					// add the new errors
+					this.msg.push(e);
 				});
 			}
 		},
@@ -108,7 +121,7 @@
         this.cm_toplist_data = response.data;
       })
       .catch(e => {
-        this.errors.push(e);
+        this.msg.push(e);
       });
     }
   });
