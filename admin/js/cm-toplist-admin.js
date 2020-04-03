@@ -20,7 +20,7 @@
         <td>
           {{ cm_toplist.name }}
         </td>
-        <td>Rating: {{ cm_toplist.rating }}</td>
+        <td>{{ cm_toplist.rating }}</td>
         <td><button class="button-primary" @click="delete_item(index, cm_toplist.id, cm_toplist.name )">Delete</button></td>
 			</tr>
 			</tbody>
@@ -93,11 +93,14 @@
 				.then(response => {
 					console.log(response);
 
-					this.cm_toplist_data.push({
-						id: response.data.brand_id,
-						name: response.data.brand_name,
-						rating: response.data.brand_rating
-					});
+					if ( response.data.brand_id ) {
+						this.cm_toplist_data.push({
+							id: response.data.brand_id,
+							name: response.data.brand_name,
+							rating: response.data.brand_rating
+						});
+					}
+
 
 					// Output response msg
 					this.msg.push(response.data)

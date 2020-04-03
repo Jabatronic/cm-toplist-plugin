@@ -1,10 +1,7 @@
 <?php
 
 /**
- * The file that defines the core plugin class
- *
- * A class definition that includes attributes and functions used across both the
- * public-facing side of the site and the admin area.
+ * TODO: Extract database operations to dedicated class
  *
  * @link       jr@iamjabulani.tech
  * @since      1.0.0
@@ -87,7 +84,7 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 
 			</div>
 
-		<?php
+			<?php
 		}
 
 	}
@@ -159,52 +156,63 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 	public function get_items( $request ) {
 		global $wpdb;
 
+		$brands_table_name   = $wpdb->prefix . 'toplist_brands';
+		$brand_ratings_table = $wpdb->prefix . 'toplist_brand_ratings';
+
 		$sql = "
 		SELECT 
-		wp_toplist_brands.id,
-		wp_toplist_brands.name,
-		wp_toplist_brand_ratings.rating
+		{$brands_table_name}.id,
+		{$brands_table_name}.name,
+		{$brand_ratings_table}.rating
 		FROM wp_toplist_brands
-		JOIN wp_toplist_brand_ratings ON wp_toplist_brands.id = wp_toplist_brand_ratings.brand_id
-		ORDER BY wp_toplist_brand_ratings.rating DESC
+		JOIN wp_toplist_brand_ratings ON {$brands_table_name}.id = {$brand_ratings_table}.brand_id
+		ORDER BY {$brand_ratings_table}.rating DESC
 	";
 
-	$items = $wpdb->get_results( $sql, ARRAY_A );
-
-// var_dump($items);
-
-		// $data = array();
-		// foreach( $items as $item ) {
-		// 	$itemdata = $this->prepare_item_for_response( $item, $request );
-		// 	$data[]   = $this->prepare_response_for_collection( $itemdata );
-		// }
-
-// var_dump($data);
+		$items = $wpdb->get_results( $sql, ARRAY_A );
 
 		return new WP_REST_Response( $items, 200 );
 	}
 
 	/**
-	 * NOT CURRENTLY USED
-	 * Create one item from the collection
+	 * Create one item
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
-		$item = $this->prepare_item_for_database( $request );
-		if ( method_exists( $this, 'cm_toplist_add_rating' ) ) {
-			$data = $this->cm_toplist_add_rating( $item );
-			if ( is_array( $data ) ) {
-				return new WP_REST_Response( $data, 200 );
-			} else {
-				echo 'not created';
-				return $data;
+
+		/**
+		 * Check that correct data exists in the request
+		 *
+		 * TODO: Add value limits (min/max) for rating.
+		 */
+		if ( empty( $request['brand_name'] ) ) {
+
+			wp_send_json_error( new WP_Error( 'cant-create', __( 'Please provide a brand name.', 'text-domain' ), array( 'status' => 500 ) ) );
+
+		} elseif ( empty( $request['brand_rating'] ) ) {
+
+			wp_send_json_error( new WP_Error( 'cant-create', __( 'Please provide a brand name AND a rating.', 'text-domain' ), array( 'status' => 500 ) ) );
+
+		} else {
+
+			if ( method_exists( $this, 'cm_toplist_add_rating' ) ) {
+
+				$item = $this->prepare_item_for_database( $request );
+
+				$data = $this->cm_toplist_add_rating( $item );
+
+				if ( is_wp_error( $data ) ) {
+
+					wp_send_json_error( $data );
+
+				} else {
+
+					return new WP_REST_Response( $data, 200 );
+				}
 			}
 		}
-
-		return new WP_Error( 'cant-create', __( 'message', 'text-domain' ), array( 'status' => 500 ) );
-		// return $data;
 	}
 
 	/**
@@ -242,18 +250,22 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 
 		$brand_name_test = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT * FROM wp_toplist_brands WHERE name LIKE %s",
+				"SELECT * FROM {$brands_table_name} WHERE name LIKE %s",
 				$brand_name
 			)
 		);
 
-		if ( $brand_name_test === [] AND !empty( $brand_rating ) ) {
+		// var_dump(  $brand_name_test  );
+		// die();
+
+		if ( is_array( $brand_name_test ) && count( $brand_name_test ) < 1 ) {
 			$result = $wpdb->insert( $brands_table_name, array(
 				'name' => $brand_name,
 				)
 			);
 
-			$brand_id = $wpdb->insert_id;
+			$brand_id         = $wpdb->insert_id;
+			$item['brand_id'] = $brand_id;
 
 			$result2 = $wpdb->insert( $brand_ratings_table, array( 
 				'brand_id' => $brand_id,
@@ -261,16 +273,18 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 				) 
 			);
 
-			$item['brand_id'] = $brand_id;
-			// echo $wpdb->last_error;
+			if ( $result && $result2 ) {
 
-			if ( $result ) {
 				return $item;
+
 			} else {
+
 				return new WP_Error( 'error_toplist_add_rating', __( 'There was an error adding this rating. Please check your data and try again.', 'cm-toplist' ), array( 'status' => 500 ) );
 			}
 		} else {
-			return new WP_Error( 'error_toplist_add_rating', __( 'This rating has already been created in the database. Maybe try updating the rating instead?.', 'cm-toplist' ), array( 'status' => 500 ) );
+
+			return new WP_Error( 'error_toplist_add_rating', __( 'This brand already exists in the database. Please check your data and try again.', 'cm-toplist' ), array( 'status' => 500 ) );
+
 		}
 	}
 
@@ -281,12 +295,12 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 	 * @return WP_Error|object $prepared_item
 	 */
 	protected function prepare_item_for_database( $request ) {
-		$request_brandname    = $request->get_param( 'brand_name' );
+		$request_brand_name   = $request->get_param( 'brand_name' );
 		$request_brand_rating = $request->get_param( 'brand_rating' );
 		$request_brand_id     = $request->get_param( 'brand_id' );
 
-		if ( isset( $request_brandname ) ) {
-			$brand_name = wp_filter_nohtml_kses( sanitize_text_field( $request_brandname ) );
+		if ( isset( $request_brand_name ) ) {
+			$brand_name = wp_filter_nohtml_kses( sanitize_text_field( $request_brand_name ) );
 		} else {
 			$brand_name = '';
 		}
@@ -313,24 +327,6 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 	}
 
 
-	/**
-	 * Update one item from the collection
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 * @return WP_Error|WP_REST_Response
-	 */
-	public function update_item( $request ) {
-		$item = $this->prepare_item_for_database( $request );
-
-		if ( function_exists( 'slug_some_function_to_update_item' ) ) {
-			$data = slug_some_function_to_update_item( $item );
-			if ( is_array( $data ) ) {
-				return new WP_REST_Response( $data, 200 );
-			}
-		}
-
-		return new WP_Error( 'cant-update', __( 'messagezzzz', 'text-domain' ), array( 'status' => 500 ) );
-	}
 
 	/**
 	 * Delete one item from the collection
@@ -343,12 +339,21 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 
 		if ( method_exists( $this, 'cm_toplist_remove_rating' ) ) {
 			$deleted = $this->cm_toplist_remove_rating( $item );
-			if ( is_array( $deleted ) ) {
-				return new WP_REST_Response( 'Item successfully deleted', 200 );
-			}
-		}
 
-		return new WP_Error( 'cant-delete', __( 'message', 'text-domain' ), array( 'status' => 500 ) );
+			if ( is_wp_error( $deleted ) ) {
+				$delete_error = $deleted;
+				wp_send_json_error( $delete_error );
+			}
+
+			if ( $deleted ) {
+				return new WP_REST_Response( 'Item id=' . $deleted . ' successfully deleted', 200 );
+			} else {
+				wp_send_json_error( new WP_Error( 'cant-delete', __( 'This item does not exist in the database!', 'text-domain' ), array( 'status' => 500 ) ) );
+
+			}
+		} else {
+			wp_send_json_error( new WP_Error( 'cant-delete', __( 'no endpoint exists to delete this item!', 'text-domain' ), array( 'status' => 500 ) ) );
+		}
 	}
 
 	/**
@@ -363,25 +368,20 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 		$brand_ratings_table = $wpdb->prefix . 'toplist_brand_ratings';
 		$brand_id            = $item['brand_id'];
 
+		/**
+		 * If the brand exists in brands DB
+		 * an array will be returned
+		 * 
+		 * @return mixed Array|fale
+		 */
 		$brand_id_test = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT * FROM wp_toplist_brands WHERE id = %s',
+				"SELECT * FROM {$brands_table_name} WHERE id = %s",
 				$brand_id
 			)
 		);
 
-		if ( ! is_array( $brand_id_test ) ) {
-			return new WP_Error(
-				'error_toplist_remove_rating',
-				__(
-					'There was an error removing this rating. Please check your data and try again.',
-					'cm-toplist'
-				),
-				array( 'status' => 500 )
-			);
-		}
-
-		if ( is_array( $brand_id_test ) ) {
+		if ( $brand_id_test ) {
 			$result = $wpdb->delete( $brands_table_name, 
 				array(
 					'id' => $brand_id,
@@ -389,29 +389,28 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 				array( '%d' )
 			);
 
-			$result2 = $wpdb->delete( $brand_ratings_table,
-				array(
-					'brand_id' => $brand_id,
-				),
-				array( '%d' )
-			);
+			/**
+			 * If first delete operation was successful then attempt to delete
+			 * the associated data in the ratings table ()
+			 */
+			if ( $result ) {
+				$result2 = $wpdb->delete( $brand_ratings_table,
+					array(
+						'brand_id' => $brand_id,
+					),
+					array( '%d' )
+				);
+			}
+
+			if ( $result && $result2 ) {
+				return $brand_id;
+			} else {
+				return 	new WP_Error( 'cant-delete', __( 'There was a problem removing this item. Please inform SysAdmin', 'text-domain' ), array( 'status' => 500 ) );
+
+			}
 
 			// echo $wpdb->last_error;
 
-			if ( $result ) {
-				return $item;
-			} else {
-				return new WP_Error(
-					'error_toplist_remove_rating',
-					__(
-						'There was an error removing this rating. Please check your data and try again.',
-						'cm-toplist'
-					),
-					array( 'status' => 500 )
-				);
-			}
-		} else {
-			return new WP_Error( 'error_toplist_remove_rating', __( 'There were problems adding your rating to thw data. Maybe try updating the rating instead?.', 'cm-toplist' ), array( 'status' => 500 ) );
 		}
 	}
 
@@ -426,15 +425,6 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 		// return current_user_can( 'edit_something' );
 	}
 
-	/**
-	 * Check if a given request has access to get a specific item
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 * @return WP_Error|bool
-	 */
-	public function get_item_permissions_check( $request ) {
-		return $this->get_items_permissions_check( $request );
-	}
 
 	/**
 	 * Check if a given request has access to create items
@@ -445,16 +435,6 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 	public function create_item_permissions_check( $request ) {
 		// return current_user_can( 'administrator' );
 		return true;
-	}
-
-	/**
-	 * Check if a given request has access to update a specific item
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 * @return WP_Error|bool
-	 */
-	public function update_item_permissions_check( $request ) {
-		return $this->create_item_permissions_check( $request );
 	}
 
 	/**
