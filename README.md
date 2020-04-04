@@ -8,7 +8,7 @@
 
 ## Update!!
 
-I have successfully added wp_nonce headers so only logged in administrators can create or delete records. This seems to work but needs further testing.
+I have successfully implemented wp_nonce token so only logged in administrators can create or delete records. This seems to work but needs further testing.
 
 So far I have tested by attempting those actions through Postman without sending \_wpnonce which fails in the desired way, and then attempting the same actions through the plugin admin panel which succeeds in the desired way.
 
