@@ -65,6 +65,8 @@ Styling
 
 
 # Improvements/To Do
+- Further testing of Rest API security
+- Implement tooling (grunt or webpack) to handle eslint, sass, ES6 (Babel)
 - Improved input validation
 - Improved responsivity
 - Option to 'update' records in the settings page
