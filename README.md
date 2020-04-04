@@ -2,9 +2,17 @@
 
 ## IMPORTANT!
 
-I have NOT YET solved some rest API authentication issues with this plugin. As such this plugin is vulnerable to security threats!
+~~I have NOT YET solved some rest API authentication issues with this plugin. As such this plugin is vulnerable to security threats!~~
 
-It must not be used in a production environment!! I recommend testing in a VM or Container.
+~~It must not be used in a production environment!! I recommend testing in a VM or Container.~~
+
+## Update!!
+
+I have successfully added wp_nonce headers so only logged in administrators can create or delete records. This seems to work but needs further testing.
+
+So far I have tested by attempting those actions through Postman without sending \_wpnonce which fails in the desired way, and then attempting the same actions through the plugin admin panel which succeeds in the desired way.
+
+Please let me know your thoughts on using this method.
 
 ### Use
 
@@ -57,7 +65,6 @@ Styling
 
 
 # Improvements/To Do
-- API request security
 - Improved input validation
 - Improved responsivity
 - Option to 'update' records in the settings page
