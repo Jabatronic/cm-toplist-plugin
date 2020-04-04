@@ -326,8 +326,6 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 		return $item;
 	}
 
-
-
 	/**
 	 * Delete one item from the collection
 	 *
@@ -434,7 +432,12 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 	 */
 	public function create_item_permissions_check( $request ) {
 		// return current_user_can( 'administrator' );
-		return true;
+		if ( current_user_can( 'administrator' ) ) {
+			return true;
+		} else {
+			return false;
+		}
+
 	}
 
 	/**

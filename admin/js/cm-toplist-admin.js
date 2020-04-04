@@ -64,7 +64,7 @@
 				this.msg = [];
 				if ( confirm(`Are you sure you wish to remove ${delete_name} from the database? `) ) {
 					axios
-					.delete(`${wpApiSettings.url}?brand_id=${delete_id}`)
+					.delete(`${wpApiSettings.url}?_wpnonce=${wpApiSettings.nonce}&brand_id=${delete_id}`)
 					.then(response => {
 						console.log(response);
 						this.cm_toplist_data.splice(index, 1);
@@ -84,9 +84,7 @@
 				this.msg = [];
 
 				axios
-				.post( wpApiSettings.url, {
-					headers: { 'X-WP-Nonce': wpApiSettings.nonce },
-					withCredentials: true,
+				.post( `${wpApiSettings.url}?_wpnonce=${wpApiSettings.nonce}`, {
 					brand_name: this.casino_name,
 					brand_rating: this.casino_rating,
 				})
