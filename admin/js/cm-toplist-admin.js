@@ -117,7 +117,7 @@
     mounted: function(){
 			console.log("cm-toplist-vue-admin activated!");
 			axios
-      .get(`http://localhost/jtron-plugin-dev/wp-json/cm-toplist/v1/route`)
+      .get( wpApiSettings.url )
       .then(response => {
         this.cm_toplist_data = response.data;
       })
