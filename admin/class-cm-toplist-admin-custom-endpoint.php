@@ -57,7 +57,7 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 	}
 
 	/**
-	 * Admin nag message is WP API not enabled.
+	 * Admin nag message if WP API not enabled.
 	 *
 	 * @since    0.1.0
 	 */
@@ -79,7 +79,7 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 			<div class="update-nag notice">
 
 				<p>
-					<?php __( 'To use <strong>API Boilerplate</strong>, you need to update to the latest version of WordPress (version 4.7 or above). To use an older version of WordPress, you can install the <a href="https://wordpress.org/plugins/rest-api/">WP API Plugin</a> plugin. However, we&apos;d strongly advise youto update WordPress.', 'api-boilerplate' ); ?>
+					<?php __( 'To use <strong>Catena Media Toplist API</strong>, you need to update to the latest version of WordPress (version 4.7 or above). To use an older version of WordPress, you can install the <a href="https://wordpress.org/plugins/rest-api/">WP API Plugin</a> plugin. However, we&apos;d strongly advise youto update WordPress.', 'cm-toplist' ); ?>
 				</p>
 
 			</div>
@@ -164,8 +164,8 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 		{$brands_table_name}.id,
 		{$brands_table_name}.name,
 		{$brand_ratings_table}.rating
-		FROM wp_toplist_brands
-		JOIN wp_toplist_brand_ratings ON {$brands_table_name}.id = {$brand_ratings_table}.brand_id
+		FROM {$brands_table_name}
+		JOIN {$brand_ratings_table} ON {$brands_table_name}.id = {$brand_ratings_table}.brand_id
 		ORDER BY {$brand_ratings_table}.rating DESC
 	";
 
@@ -236,7 +236,7 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 	}
 
 	/**
-	 * Create a new record and return id
+	 * Create a new record and return the $item or an error
 	 *
 	 * @param  Array $item
 	 * @return mixed
@@ -254,9 +254,6 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 				$brand_name
 			)
 		);
-
-		// var_dump(  $brand_name_test  );
-		// die();
 
 		if ( is_array( $brand_name_test ) && count( $brand_name_test ) < 1 ) {
 			$result = $wpdb->insert( $brands_table_name, array(
@@ -344,7 +341,17 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 			}
 
 			if ( $deleted ) {
-				return new WP_REST_Response( 'Item id=' . $deleted . ' successfully deleted', 200 );
+				return new WP_REST_Response(
+					array(
+						'success' => true,
+						'data'    =>
+						array(
+							'code'    => 'successfully-deleted',
+							'message' => $deleted,
+						),
+					),
+					200
+				);
 			} else {
 				wp_send_json_error( new WP_Error( 'cant-delete', __( 'This item does not exist in the database!', 'text-domain' ), array( 'status' => 500 ) ) );
 
@@ -358,7 +365,7 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 	 * Remove a new record and return id
 	 *
 	 * @param  Array $item
-	 * @return mixed
+	 * @return mixed $brand_id|WP_Error
 	 */
 	public function cm_toplist_remove_rating( $item ) {
 		global $wpdb;
@@ -366,12 +373,6 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 		$brand_ratings_table = $wpdb->prefix . 'toplist_brand_ratings';
 		$brand_id            = $item['brand_id'];
 
-		/**
-		 * If the brand exists in brands DB
-		 * an array will be returned
-		 * 
-		 * @return mixed Array|fale
-		 */
 		$brand_id_test = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT * FROM {$brands_table_name} WHERE id = %s",
@@ -389,7 +390,7 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 
 			/**
 			 * If first delete operation was successful then attempt to delete
-			 * the associated data in the ratings table ()
+			 * the associated data in the ratings table
 			 */
 			if ( $result ) {
 				$result2 = $wpdb->delete( $brand_ratings_table,
@@ -401,14 +402,14 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 			}
 
 			if ( $result && $result2 ) {
+
 				return $brand_id;
+
 			} else {
+
 				return 	new WP_Error( 'cant-delete', __( 'There was a problem removing this item. Please inform SysAdmin', 'text-domain' ), array( 'status' => 500 ) );
 
 			}
-
-			// echo $wpdb->last_error;
-
 		}
 	}
 
