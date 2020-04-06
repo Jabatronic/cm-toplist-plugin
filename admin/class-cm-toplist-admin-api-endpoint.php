@@ -1,5 +1,4 @@
 <?php
-
 /**
  * TODO: Extract database operations to dedicated class
  *
@@ -11,7 +10,11 @@
  *
  * https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/#examples
  */
-class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
+
+/**
+ * Controller class for the rest endpoints
+ */
+class CM_Toplist_Admin_API_Endpoint extends WP_REST_Controller {
 
 	/**
 	 * The ID of this plugin.
@@ -34,9 +37,9 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 	/**
 	 * The options name prefix for API Boilerplate
 	 *
-	 * @since  	0.1
-	 * @access 	private
-	 * @var  		string 		$option_name 	Option name prefix for API Boilerplate
+	 * @since   0.1
+	 * @access  private
+	 * @var         string      $option_name    Option name prefix for API Boilerplate
 	 */
 	private $option_name;
 
@@ -44,16 +47,13 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 	 * Initialize the class and set its properties.
 	 *
 	 * @since    0.1.0
-	 * @param 	 string 	$plugin_name 		  The name of this plugin.
-	 * @param    string    	$version    		  The version of this plugin.
-	 * @param    string    	$option_name   		  The option prefix for this plugin.
+	 * @param    string $plugin_name          The name of this plugin.
+	 * @param    string $version              The version of this plugin.
 	 */
 	public function __construct( $plugin_name, $version ) {
 
-		$this->plugin_name        = $plugin_name;
-		$this->version            = $version;
-		// $this->option_name        = $option_name;
-
+		$this->plugin_name = $plugin_name;
+		$this->version     = $version;
 	}
 
 	/**
@@ -65,12 +65,12 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 
 		global $wp_version;
 
-		// WP v4.7 was the first WP version with the API fully baked in :)
+		// WP v4.7 was the first WP version with the API fully baked in.
 		if ( $wp_version >= 4.7 ) {
 
 			return;
 
-		} elseif ( is_plugin_active( 'WP-API-develop/plugin.php' ) || is_plugin_active( 'rest-api/plugin.php' )  || is_plugin_active( 'WP-API/plugin.php' ) ) {
+		} elseif ( is_plugin_active( 'WP-API-develop/plugin.php' ) || is_plugin_active( 'rest-api/plugin.php' ) || is_plugin_active( 'WP-API/plugin.php' ) ) {
 
 				return;
 
@@ -93,58 +93,68 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 	 * Register the routes for the objects of the controller.
 	 */
 	public function cm_toplist_api_route_constructor() {
-		$version = '1';
+		$version   = '1';
 		$namespace = $this->plugin_name . '/v' . $version;
-		$base = 'route';
-		register_rest_route( $namespace, '/' . $base, array(
+		$base      = 'route';
+		register_rest_route(
+			$namespace,
+			'/' . $base,
 			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				'args'                => array(
-
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => array(),
 				),
-			),
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'create_item' ),
-				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( true ),
-			),
-		) );
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'create_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( true ),
+				),
+			)
+		);
 
-		register_rest_route( $namespace, '/' . $base, array(
+		register_rest_route(
+			$namespace,
+			'/' . $base,
 			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_item' ),
-				'permission_callback' => array( $this, 'get_item_permissions_check' ),
-				'args'                => array(
-					'context' => array(
-						'default' => 'view',
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'args'                => array(
+						'context' => array(
+							'default' => 'view',
+						),
 					),
 				),
-			),
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_item' ),
-				'permission_callback' => array( $this, 'update_item_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( false ),
-			),
-			array(
-				'methods'             => WP_REST_Server::DELETABLE,
-				'callback'            => array( $this, 'delete_item' ),
-				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
-				'args'                => array(
-					'force' => array(
-						'default' => false,
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( false ),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_item' ),
+					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+					'args'                => array(
+						'force' => array(
+							'default' => false,
+						),
 					),
 				),
-			),
-		) );
-		register_rest_route( $namespace, '/' . $base . '/schema', array(
-			'methods'  => WP_REST_Server::READABLE,
-			'callback' => array( $this, 'get_public_item_schema' ),
-		) );
+			)
+		);
+		register_rest_route(
+			$namespace,
+			'/' . $base . '/schema',
+			array(
+				'methods'  => WP_REST_Server::READABLE,
+				'callback' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -219,7 +229,7 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 	 * NOT CURRENTLY IN USE
 	 * Prepare the item for the REST response
 	 *
-	 * @param mixed $item WordPress representation of the item.
+	 * @param mixed           $item WordPress representation of the item.
 	 * @param WP_REST_Request $request Request object.
 	 * @return mixed
 	 */
@@ -256,18 +266,22 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 		);
 
 		if ( is_array( $brand_name_test ) && count( $brand_name_test ) < 1 ) {
-			$result = $wpdb->insert( $brands_table_name, array(
-				'name' => $brand_name,
+			$result = $wpdb->insert(
+				$brands_table_name,
+				array(
+					'name' => $brand_name,
 				)
 			);
 
 			$brand_id         = $wpdb->insert_id;
 			$item['brand_id'] = $brand_id;
 
-			$result2 = $wpdb->insert( $brand_ratings_table, array( 
-				'brand_id' => $brand_id,
-				'rating'   => $brand_rating,
-				) 
+			$result2 = $wpdb->insert(
+				$brand_ratings_table,
+				array(
+					'brand_id' => $brand_id,
+					'rating'   => $brand_rating,
+				)
 			);
 
 			if ( $result && $result2 ) {
@@ -381,7 +395,8 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 		);
 
 		if ( $brand_id_test ) {
-			$result = $wpdb->delete( $brands_table_name, 
+			$result = $wpdb->delete(
+				$brands_table_name,
 				array(
 					'id' => $brand_id,
 				),
@@ -393,7 +408,8 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 			 * the associated data in the ratings table
 			 */
 			if ( $result ) {
-				$result2 = $wpdb->delete( $brand_ratings_table,
+				$result2 = $wpdb->delete(
+					$brand_ratings_table,
 					array(
 						'brand_id' => $brand_id,
 					),
@@ -407,7 +423,7 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 
 			} else {
 
-				return 	new WP_Error( 'cant-delete', __( 'There was a problem removing this item. Please inform SysAdmin', 'text-domain' ), array( 'status' => 500 ) );
+				return new WP_Error( 'cant-delete', __( 'There was a problem removing this item. Please inform SysAdmin', 'text-domain' ), array( 'status' => 500 ) );
 
 			}
 		}
@@ -452,12 +468,12 @@ class CM_Toplist_API_Custom_Endpoint extends WP_REST_Controller {
 	 */
 	public function get_collection_params() {
 		return array(
-			'brand_name' => array(
+			'brand_name'   => array(
 				'description'       => 'The name of the brand to be rated.',
 				'type'              => 'string',
 				'sanitize_callback' => 'string',
 			),
-			'brand_rating'     => array(
+			'brand_rating' => array(
 				'description'       => 'The rating for the brand.',
 				'type'              => 'integer',
 				'default'           => 1,
