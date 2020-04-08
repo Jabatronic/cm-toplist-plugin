@@ -99,7 +99,7 @@ class Cm_Toplist_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/cm-toplist-admin.css', array(), $this->version, 'all' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/cm-toplist-admin.min.css', array(), $this->version, 'all' );
 
 	}
 
