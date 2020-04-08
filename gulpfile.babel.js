@@ -12,6 +12,7 @@ const nested        = require('postcss-nested');
 const fs            = require('fs');
 const plumber       = require('gulp-plumber');
 const del           = require('del');
+const babel         = require('gulp-babel');
 const processors = [
     //postcss plugins will go here
     nested,
@@ -23,6 +24,10 @@ exports.startUp     = startUp;
 exports.adminCSS    = adminCSS;
 exports.publicCSS   = publicCSS;
 exports.watchCSS    = watchCSS;
+exports.adminJS     = adminJS;
+exports.watchJS     = watchJS;
+exports.watchAll     = watchAll;
+
 
 function startUp(cb) {
     const src = '/src';
@@ -76,6 +81,29 @@ function publicCSS() {
         .pipe(gulp.dest("./public/css"))
 }
 
+
+/**
+ * JS
+ */
+function adminJS() {
+    return gulp.src("./admin/js/src/*.js")
+    .pipe( babel() )
+    .pipe(rename(function(path){
+        path.basename += '.es5'
+    }))
+    .pipe( gulp.dest("./admin/js/") )
+}
+
 function watchCSS() {
     gulp.watch(['admin/css/src/*.css', 'public/css/src/*.css'], gulp.series(exports.adminCSS, exports.publicCSS));
 };
+
+function watchJS() {
+    gulp.watch(['admin/js/src/*.js'], gulp.series(exports.adminJS));
+};
+
+function watchAll() {
+    // Watch the lot of 'em
+    gulp.watch(['admin/css/src/*.css', 'public/css/src/*.css', 'admin/js/src/*.js'], gulp.series(exports.adminCSS, exports.publicCSS, exports.adminJS));
+
+}

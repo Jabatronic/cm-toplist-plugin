@@ -44,13 +44,13 @@ class Cm_Toplist_Admin {
 	 * Initialize the class and set its properties.
 	 *
 	 * @since    1.0.0
-	 * @param    string    $plugin_name       The name of this plugin.
-	 * @param    string    $version    The version of this plugin.
+	 * @param    string $plugin_name       The name of this plugin.
+	 * @param    string $version    The version of this plugin.
 	 */
 	public function __construct( $plugin_name, $version ) {
 
 		$this->plugin_name = $plugin_name;
-		$this->version = $version;
+		$this->version     = $version;
 
 	}
 
@@ -124,21 +124,24 @@ class Cm_Toplist_Admin {
 
 		$current_screen = get_current_screen();
 
-		if (  $current_screen->id === 'toplevel_page_cm-toplist-admin' ) {
+		if ( $current_screen->id === 'toplevel_page_cm-toplist-admin' ) {
 
 			wp_enqueue_script( 'VueJS', 'https://cdn.jsdelivr.net/npm/vue/dist/vue.js', array(), '2.6.11' );
 			wp_enqueue_script( 'Axios', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js', array( 'VueJS' ), null, false );
-			wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/cm-toplist-admin.js', array( 'VueJS', 'Axios' ), $this->version, true );	
+			wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/cm-toplist-admin.es5.js', array( 'VueJS', 'Axios' ), $this->version, true );
 
 			/**
 			 *  Pass the nonce value and rest url
 			 *  for js/cm-toplist-admin.js to use
 			 *  in api requests
 			 */
-			wp_localize_script(  $this->plugin_name, 'wpApiSettings', array(
-				'url' => esc_url_raw( rest_url() . 'cm-toplist/v1/route/' ),
-				'root' => esc_url_raw( rest_url() . 'cm-toplist/v1/route/' ),
-				'nonce' => wp_create_nonce( 'wp_rest' ),
+			wp_localize_script(
+				$this->plugin_name,
+				'wpApiSettings',
+				array(
+					'url'   => esc_url_raw( rest_url() . 'cm-toplist/v1/route/' ),
+					'root'  => esc_url_raw( rest_url() . 'cm-toplist/v1/route/' ),
+					'nonce' => wp_create_nonce( 'wp_rest' ),
 				)
 			);
 
