@@ -2,6 +2,12 @@
 // /* eslint no-undef: "off" */
 'use strict';
 
+
+/**
+ * TODO: Minify JS, Add browsersync for live reload in dev,
+ * remove unused packages
+ */
+
 const gulp          = require('gulp');
 const sass          = require('gulp-sass');
 const rename        = require('gulp-rename');
