@@ -56,7 +56,7 @@ Plugin Settings Menu/Page
 - I chose to use VueJs to create the add/delete page in the admin section. I wanted to demonstrate that I have a working knowledge of modern javascript frameworks and also wanted to learn how to integrate Vue with Wordpress. This was a limited approach which could be expanded upon by creating good workflow and implementing tooling and build processes
 
 Rest API
-- ~~I chose to leave requests to the API as unauthenticated for all users as I could not get wp_nonce header authentication to work yet. This made me sad and I will continue to seek a solution (any tips gratefully received!). ~~
+- ~~I chose to leave requests to the API as unauthenticated for all users as I could not get wp_nonce header authentication to work yet. This made me sad and I will continue to seek a solution (any tips gratefully received!).~~
 
 Styling
 - Even though I am primarily a frontend developer I chose to leave the styling of the user-facing shortcode output to a minimum for two reasons:
@@ -67,7 +67,7 @@ Styling
 
 # Improvements/To Do
 - Further testing of Rest API security
-- Implement tooling (grunt or webpack) to handle eslint, sass, ES6 (Babel)
+- ~~Implement tooling (grunt or webpack) to handle eslint, sass, ES6 (Babel)~~
 - Improved input validation
 - Improved responsivity
 - Option to 'update' records in the settings page
