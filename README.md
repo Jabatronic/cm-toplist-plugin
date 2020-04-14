@@ -34,7 +34,7 @@ I began by creating a small "use case" test for each element of functionality th
 
 In researching for a more robust way to put the plugin together I found the Wordpress Plugin Boilerplate which provided me with an opinionated structure to scaffold my project whilst also learning about object-oriented approaches to Wordpress development.
 
-I intend to continue refining this for my own learning and especially to nail down the rest authentication issues!
+I intend to continue refining this for my own learning and especially to learn more about rest authentication in WordPress.
 
 ## Resources Used
 
@@ -54,8 +54,9 @@ Creating Custom Database Tables
 Plugin Settings Menu/Page
 - I decided to use a top-level menu to be easy to find for those assessing this task. In production, I wouldn’t do this for a plugin with just a single admin page
 - I chose to use VueJs to create the add/delete page in the admin section. I wanted to demonstrate that I have a working knowledge of modern javascript frameworks and also wanted to learn how to integrate Vue with Wordpress. This was a limited approach which could be expanded upon by creating good workflow and implementing tooling and build processes
+
 Rest API
-- I chose to leave requests to the API as unauthenticated for all users as I could not get wp_nonce header authentication to work yet. This made me sad and I will continue to seek a solution (any tips gratefully received!). 
+- ~~I chose to leave requests to the API as unauthenticated for all users as I could not get wp_nonce header authentication to work yet. This made me sad and I will continue to seek a solution (any tips gratefully received!). ~~
 
 Styling
 - Even though I am primarily a frontend developer I chose to leave the styling of the user-facing shortcode output to a minimum for two reasons:
